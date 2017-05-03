@@ -1,5 +1,5 @@
 var templateUrlConfig = {
-	appTemplateEntryPoint : "/angSpring/",
+	appTemplateEntryPoint : "/empApp/",
 	userTemplateGroup : "/users/"
 };
 

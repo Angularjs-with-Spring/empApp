@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('employeeApp').factory('AuthService',
+angular.module('userApp').factory('AuthService',
 		[ '$resource', function($resource) {
 			return new Auth($resource);
 		} ]);
@@ -14,10 +14,11 @@ function Auth(resource) {
 	}*/
 	
 	this.isAuthenticated = function(scope) {
-		var User = resource('/angSpring/users/auth');
+		/*var User = resource('/angSpring/users/auth');
 		User.get(function(userState) {
 			scope.authStatus = userState.status;
-		});
-		return scope.authStatus;
+		});*/
+		/*return scope.authStatus;*/
+		return true;
 	}
 }

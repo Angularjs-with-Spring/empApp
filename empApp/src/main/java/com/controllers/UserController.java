@@ -19,4 +19,12 @@ public class UserController {
 		
 		return new ModelAndView("user/newuser", "data", data);
 	}
+	
+	@RequestMapping(value = { "/launchUser" }, method = RequestMethod.GET)
+	public ModelAndView formlaunchUser() throws IOException {
+		
+		Map<String, Object> data = new HashMap<String, Object>();
+		
+		return new ModelAndView("user/new", "data", data);
+	}
 }
