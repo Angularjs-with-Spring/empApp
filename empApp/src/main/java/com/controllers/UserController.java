@@ -20,11 +20,11 @@ public class UserController {
 		return new ModelAndView("user/newuser", "data", data);
 	}
 	
-	@RequestMapping(value = { "/launchUser" }, method = RequestMethod.GET)
-	public ModelAndView formlaunchUser() throws IOException {
+	@RequestMapping(value = { "/twitter" }, method = RequestMethod.GET)
+	public ModelAndView formTwitter() throws IOException {
 		
 		Map<String, Object> data = new HashMap<String, Object>();
 		
-		return new ModelAndView("user/new", "data", data);
+		return new ModelAndView("twitter/login", "data", data);
 	}
 }

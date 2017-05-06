@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container">
+  <h2>Twitter Login Response Details</h2>
+  <div id="requestToken" class="btn btn-sm" >Request-Token</div>
+</div>
+</body>
+
+<script type="text/javascript">
+var hexcase = 0; 
+var b64pad  = ""; 
+var chrsz   = 8;	
+
+$(document).ready(function(){
+	
+    $("#requestToken").click(function(){
+    	alert("request_token sending..!");
+    	//Unix time
+        var foo = new Date; // Generic JS date object
+        var unixtime_ms = foo.getTime(); // Returns milliseconds since the epoch
+        var unixtime = parseInt(unixtime_ms / 1000);
+
+        var callBackURL = "http://localhost:8989/empApp/users/twitter"; //oob for now
+        var nonce = "K7ny27JTpKVsTgdyLdDfmQQWVLERj2zAK5BslRsqyw";
+
+        //Create Signature Base String using formula
+        var baseSign = "POST" + "&" + encodeURIComponent("https://api.twitter.com/oauth/request_token").toString() + "&"
+         + encodeURIComponent("oauth_callback") + "%3D" + encodeURIComponent(callBackURL)
+         + "%26"
+         + encodeURIComponent("oauth_consumer_key") + "%3D" + encodeURIComponent("Yt1LQxF2mMS8pEI896VSaZovG")
+         + "%26"
+         + encodeURIComponent("oauth_nonce") + "%3D" + encodeURIComponent(nonce)
+         + "%26"
+         + encodeURIComponent("oauth_signature_method") + "%3D" + encodeURIComponent("HMAC-SHA1")
+         + "%26"
+         + encodeURIComponent("oauth_timestamp") + "%3D" + encodeURIComponent(unixtime)
+         + "%26"
+         + encodeURIComponent("oauth_version") + "%3D" + encodeURIComponent("1.0");
+
+        //Create Signature, With consumer Secret key we sign the signature base string
+        var signature = b64_hmac_sha1("0bB16Z7lZisOpMew21bw9wZn1cnI3mrdgoa4JTWHPLZndkpeto", baseSign);
+
+        //Build headers from signature
+        var jsonData = JSON.stringify({
+            Authorization: {
+                oauth_nonce: nonce,
+                oauth_token: "3301452114-Y18TuPkdQHpU7wwKy3VeNkiZuF6tsmxagKkPZfh",
+                /* oauth_callback: encodeURIComponent(callBackURL), */
+                oauth_signature_method: "HMAC-SHA1",
+                oauth_timestamp: unixtime,
+                oauth_consumer_key: "Yt1LQxF2mMS8pEI896VSaZovG",
+                oauth_signature: signature,
+                oauth_version: "1.0"
+            }
+        });
+        
+        alert(jsonData);
+
+        //Request Access Token
+        $.ajax({
+            url: "http://api.twitter.com/oauth/request_token",
+            method: "POST",
+            headers: jsonData,
+            crossOrigin:false,
+            dataType: "jsonp",
+            success: function (data) {
+                alert(data);
+            },
+            error: function (data) {
+                alert("Error"+JSON.stringify(data));
+            }
+
+});
+    });
+});
+
+
+function b64_hmac_sha1(key, data){ return binb2b64(core_hmac_sha1(key, data));}
+
+function binb2b64(binarray)
+{
+  var tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  var str = "";
+  for(var i = 0; i < binarray.length * 4; i += 3)
+  {
+    var triplet = (((binarray[i   >> 2] >> 8 * (3 -  i   %4)) & 0xFF) << 16)
+                | (((binarray[i+1 >> 2] >> 8 * (3 - (i+1)%4)) & 0xFF) << 8 )
+                |  ((binarray[i+2 >> 2] >> 8 * (3 - (i+2)%4)) & 0xFF);
+    for(var j = 0; j < 4; j++)
+    {
+      if(i * 8 + j * 6 > binarray.length * 32) str += b64pad;
+      else str += tab.charAt((triplet >> 6*(3-j)) & 0x3F);
+    }
+  }
+  return str;
+}
+
+function core_hmac_sha1(key, data)
+{
+	
+	
+  var bkey = str2binb(key);
+  if(bkey.length > 16) bkey = core_sha1(bkey, key.length * chrsz);
+
+  var ipad = Array(16), opad = Array(16);
+  for(var i = 0; i < 16; i++) 
+  {
+    ipad[i] = bkey[i] ^ 0x36363636;
+    opad[i] = bkey[i] ^ 0x5C5C5C5C;
+  }
+
+  var hash = core_sha1(ipad.concat(str2binb(data)), 512 + data.length * chrsz);
+  return core_sha1(opad.concat(hash), 512 + 160);
+}
+
+function str2binb(str)
+{
+  var bin = Array();
+  var mask = (1 << chrsz) - 1;
+  for(var i = 0; i < str.length * chrsz; i += chrsz)
+    bin[i>>5] |= (str.charCodeAt(i / chrsz) & mask) << (24 - i%32);
+  return bin;
+}
+
+function core_sha1(x, len)
+{
+  x[len >> 5] |= 0x80 << (24 - len % 32);
+  x[((len + 64 >> 9) << 4) + 15] = len;
+
+  var w = Array(80);
+  var a =  1732584193;
+  var b = -271733879;
+  var c = -1732584194;
+  var d =  271733878;
+  var e = -1009589776;
+
+  for(var i = 0; i < x.length; i += 16)
+  {
+    var olda = a;
+    var oldb = b;
+    var oldc = c;
+    var oldd = d;
+    var olde = e;
+
+    for(var j = 0; j < 80; j++)
+    {
+      if(j < 16) w[j] = x[i + j];
+      else w[j] = rol(w[j-3] ^ w[j-8] ^ w[j-14] ^ w[j-16], 1);
+      var t = safe_add(safe_add(rol(a, 5), sha1_ft(j, b, c, d)), 
+                       safe_add(safe_add(e, w[j]), sha1_kt(j)));
+      e = d;
+      d = c;
+      c = rol(b, 30);
+      b = a;
+      a = t;
+    }
+
+    a = safe_add(a, olda);
+    b = safe_add(b, oldb);
+    c = safe_add(c, oldc);
+    d = safe_add(d, oldd);
+    e = safe_add(e, olde);
+  }
+  return Array(a, b, c, d, e);
+  
+}
+
+function safe_add(x, y)
+{
+  var lsw = (x & 0xFFFF) + (y & 0xFFFF);
+  var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+  return (msw << 16) | (lsw & 0xFFFF);
+}
+
+function rol(num, cnt)
+{
+  return (num << cnt) | (num >>> (32 - cnt));
+}
+
+function sha1_ft(t, b, c, d)
+{
+  if(t < 20) return (b & c) | ((~b) & d);
+  if(t < 40) return b ^ c ^ d;
+  if(t < 60) return (b & c) | (b & d) | (c & d);
+  return b ^ c ^ d;
+}
+
+function sha1_kt(t)
+{
+  return (t < 20) ?  1518500249 : (t < 40) ?  1859775393 :
+         (t < 60) ? -1894007588 : -899497514;
+}
+
+</script>
+
+</html>
